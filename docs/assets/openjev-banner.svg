@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+  <title id="title">OpenJev — Typed decisions. Open research.</title>
+  <desc id="desc">A dark banner with the OpenJev wordmark and a diagram connecting state and question to three candidate scores. The bars illustrate the design, not measured model output.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1">
+      <stop stop-color="#101b2b" />
+      <stop offset="1" stop-color="#080e18" />
+    </linearGradient>
+    <linearGradient id="accent">
+      <stop stop-color="#74e0c1" />
+      <stop offset="1" stop-color="#7aa2f7" />
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="360" rx="24" fill="url(#background)" />
+  <g fill="none" stroke="#26364c" stroke-width="1">
+    <path d="M700 0V360M820 0V360M940 0V360M1060 0V360M1180 0V360" />
+    <path d="M660 60H1280M660 140H1280M660 220H1280M660 300H1280" />
+  </g>
+  <rect x="56" y="52" width="6" height="48" rx="3" fill="url(#accent)" />
+  <text x="82" y="80" fill="#74e0c1" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="3">OPEN DECISION MODELS</text>
+  <text x="56" y="176" fill="#f0f5ff" font-family="Arial, Helvetica, sans-serif" font-size="80" font-weight="700" letter-spacing="-3">OpenJev</text>
+  <text x="60" y="222" fill="#b8c8dc" font-family="Arial, Helvetica, sans-serif" font-size="25">Typed decisions. Open research.</text>
+  <text x="60" y="295" fill="#8ea3bf" font-family="Arial, Helvetica, sans-serif" font-size="15" letter-spacing="1">TYPED OUTPUTS / PROBABILISTIC DECISIONS</text>
+  <g stroke="#557893" stroke-width="2" fill="none">
+    <path d="M817 180H892M892 180V100H957M892 180H957M892 180V260H957" />
+  </g>
+  <rect x="680" y="142" width="137" height="76" rx="14" fill="#152838" stroke="#416277" />
+  <text x="748" y="173" text-anchor="middle" fill="#f0f5ff" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">STATE</text>
+  <text x="748" y="196" text-anchor="middle" fill="#98b4cc" font-family="Arial, Helvetica, sans-serif" font-size="13">+ question</text>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="14">
+    <rect x="957" y="71" width="257" height="58" rx="12" fill="#17382f" stroke="#74e0c1" />
+    <text x="975" y="106" fill="#d2fff0">A</text>
+    <rect x="1010" y="95" width="178" height="10" rx="5" fill="#74e0c1" />
+    <rect x="957" y="151" width="257" height="58" rx="12" fill="#142233" stroke="#344961" />
+    <text x="975" y="186" fill="#b8c8dc">B</text>
+    <rect x="1010" y="175" width="46" height="10" rx="5" fill="#7aa2f7" />
+    <rect x="957" y="231" width="257" height="58" rx="12" fill="#142233" stroke="#344961" />
+    <text x="975" y="266" fill="#b8c8dc">C</text>
+    <rect x="1010" y="255" width="23" height="10" rx="5" fill="#b8a1ff" />
+  </g>
+</svg>

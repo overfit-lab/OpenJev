@@ -1,0 +1,15 @@
+OpenJev
+Copyright 2026 OpenJev contributors
+
+Original OpenJev contributions are licensed under the Apache License,
+Version 2.0. See LICENSE.
+
+OpenJev is an independent project. References to TypeSafe AI, Jev, and
+Qwen identify research inspiration and a planned model backbone; they
+do not imply affiliation or endorsement.
+
+Third-party excerpts in docs/jev_info.md and docs/jev_offical.md remain
+the work of their respective authors and rights holders. They are not
+relicensed by this project's Apache-2.0 license.
+
+See THIRD_PARTY_NOTICES.md for provenance and upstream references.

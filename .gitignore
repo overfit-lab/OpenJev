@@ -1,0 +1,43 @@
+# Python environments and caches
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# Local credentials and machine settings
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Model weights, generated datasets, and experiment outputs
+/data/
+/datasets/
+/checkpoints/
+/models/
+/outputs/
+/runs/
+/wandb/
+/artifacts/
+*.safetensors
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.gguf
+*.log
+
+# Keep small, reviewed examples outside the generated-data directories.

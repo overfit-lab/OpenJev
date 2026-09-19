@@ -1,0 +1,26 @@
+name: Research discussion / 研究讨论
+description: Discuss architecture, data, probability quality, or evaluation.
+title: "[Research]: "
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question or hypothesis / 问题或假设
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence or counterexample / 证据或反例
+      description: Cite the relevant design section, a synthetic example, or a primary source. Distinguish observations from assumptions.
+    validations:
+      required: true
+  - type: textarea
+    id: experiment
+    attributes:
+      label: Suggested experiment / 建议实验
+      description: Describe data, baselines, metrics, and what result would support or reject the hypothesis.
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact on the project / 对项目的影响

@@ -1,0 +1,39 @@
+name: Bug report / 问题反馈
+description: Report a reproducible documentation, tooling, or implementation problem.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        OpenJev is currently at the design stage. Please identify the affected document, tool, commit, or released artifact.
+        For sensitive security issues, follow SECURITY.md instead of posting details here.
+  - type: input
+    id: version
+    attributes:
+      label: Affected version or document / 版本或文档
+      description: Commit, model version, or a repository file path.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction / 复现方式
+      description: Steps, a minimal input, or the exact contradictory text. Remove secrets and private data.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior / 预期与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment / 运行环境
+      description: If relevant, include OS, Python, framework versions, GPU, dtype, backend, and input sizes.
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional evidence / 补充证据
+      description: Logs, measurements, or a proposed fix, if available.
