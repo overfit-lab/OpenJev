@@ -1,0 +1,32 @@
+{
+  "model": "openjev-preview",
+  "state": {
+    "opportunity": "link",
+    "name": "Managed Postgres",
+    "description": "We make a managed PostgreSQL hosting product and would like to sponsor the newsletter in October."
+  },
+  "questions": {
+    "is_sponsor_inquiry": {
+      "type": "noul",
+      "instructions": "Does `description` ask to sponsor the site or newsletter?"
+    },
+    "product_category": {
+      "type": "choice",
+      "instructions": "What kind of product is described by `name` and `description`?",
+      "criteria": {
+        "dev_tool": "Developer tools, hosting, APIs, SaaS for developers",
+        "course": "Courses, books, or training",
+        "unrelated": "Anything not aimed at developers"
+      }
+    },
+    "message_quality": {
+      "type": "score",
+      "instructions": "How specific is the request?",
+      "criteria": [
+        "Generic template, no reference to this site",
+        "Mentions the site but no concrete ask",
+        "Concrete ask with a timeframe or product named"
+      ]
+    }
+  }
+}

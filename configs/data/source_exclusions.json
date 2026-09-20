@@ -1,0 +1,57 @@
+[
+  {
+    "file": "HanChat/OpenQA/data/train/ComplexInstruction_moss_zh.jsonl",
+    "line": 1,
+    "expected_source_id": "952dcd5f5e544544adb0e5d54a3901bf"
+  },
+  {
+    "file": "HanChat/Dialogue/data/train/Continue_moss_zh.jsonl",
+    "line": 1,
+    "expected_source_id": "0656ebcf94a5470c92d06599c8c78622"
+  },
+  {
+    "file": "HanChat/OpenQA/data/train/Hello_SimpleAI_HC3_zh.jsonl",
+    "line": 1,
+    "expected_source_id": "75cc7058ce284122a26177d2a9f72a4d"
+  },
+  {
+    "file": "HanChat/OpenQA/data/train/Hello_SimpleAI_HC3_zh.jsonl",
+    "line": 2,
+    "expected_source_id": "3adb1f9024b64b0596e46ba37de10002"
+  },
+  {
+    "file": "HanChat/CodeGeneration/data/train/sahil2801_code_instructions_120k.jsonl",
+    "line": 1,
+    "expected_source_id": "4d97bf665cd44dc6b85780ca0bba53f9"
+  },
+  {
+    "file": "HanChat/Summary/data/train/translation_samsum_en.jsonl",
+    "line": 1,
+    "expected_source_id": "6f9e92ffc5c5468ab51f70fc8e331b01"
+  },
+  {
+    "file": "HanChat/NLI/data/train/NLI_firefly_zhs.jsonl",
+    "line": 1,
+    "expected_source_id": "d6411047d7454bb284369b4bfc9d392d"
+  },
+  {
+    "file": "HanChat/TextMatching/data/train/TextMatching_firefly_zhs.jsonl",
+    "line": 1,
+    "expected_source_id": "9890b9494a234ce98124df61b26e10ec"
+  },
+  {
+    "file": "HanChat/MRC/data/train/MRC_firefly_zhs.jsonl",
+    "line": 1,
+    "expected_source_id": "23b7dc86994c476792e38c97d9909425"
+  },
+  {
+    "file": "HanChat/ClosedQA/data/train/closed_qa_dolly_en.jsonl",
+    "line": 1,
+    "expected_source_id": "aed916684ff047a3b9e2b5f72a55bb5a"
+  },
+  {
+    "file": "HanChat/DomainExpert/data/train/exam_sc_zh.jsonl",
+    "line": 1,
+    "expected_source_id": "dc2c609400654f7f8c49982c32691e8a"
+  }
+]

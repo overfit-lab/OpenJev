@@ -2,7 +2,7 @@
 
 **Status: unreleased.** Training details and evaluation results will be added with the first preview.
 
-The first model preview will be released within the next few days. See the [roadmap](../ROADMAP.md) for release scope. No model download URL is available yet.
+The first model preview is coming soon. See the [roadmap](../ROADMAP.md) for release scope. No model download URL is available yet.
 
 ## Model identity
 
@@ -10,10 +10,14 @@ The first model preview will be released within the next few days. See the [road
 | --- | --- |
 | Project | OpenJev |
 | Artifact version | Not released |
-| Planned base | Qwen/Qwen3-1.7B-Base |
+| Planned base | Configurable causal checkpoint; selected model and revision recorded per run |
 | Exact base revision | To be recorded at release |
-| Artifact format | To be recorded: full weights, or complete adapter/head/embedding bundle |
-| Choice architecture | A or B, to be selected and disclosed |
+| Reference artifact format | Residual base, adapter, scalar head, structural embeddings, tokenizer and metadata; release packaging still pending |
+| Choice architecture | B for the first run; A reserved for later comparison |
+| Fine-tuning method | Joint PiSSA, scoring head, and structural token rows; standard residual base frozen |
+| Teacher distribution distillation | Planned direct PiSSA training objective; historical remote preflight archived, 255-code tokenizer audit retained; local collection implemented; training-set approval and soft-target training pending |
+| RLCD | Skipped in the first preview |
+| Reference confidence method | top2_margin_v1; distribution statistic, not verified accuracy or Jev’s formula |
 | Supported primitives | To be measured and declared for the released checkpoint |
 | Supported languages and lengths | To be evaluated and declared |
 | Weight / adapter license | To be recorded with upstream terms at release |
@@ -31,11 +35,13 @@ It is not yet validated for production automation or high-impact decisions. Type
 
 Record the actual training stages completed, trainable modules, unique source/state/decision counts, candidate counts, token budgets, languages, task families, and data provenance. Distinguish verified labels, observed outcomes, known distributions, human distributions, and teacher labels.
 
-Include the data split policy, generator and verifier versions, base revision, tokenizer changes, input compiler version, optimizer settings, random seeds, training hardware, runtime, and code commit. Do not substitute the planned 0.5M–2M decision budget for the actual preview's training size.
+Include the data split policy, generator and verifier versions, base revision, tokenizer changes, input compiler version, optimizer settings, random seeds, training hardware, runtime, and code commit. The current plan is to review about 100 examples before a 1K–3K training run; report actual counts rather than planned budgets.
+
+The local interface supports Choice, Noul, Score and usage. Historical hard-label experiments and their training entrypoint are [archived](ARCHIVE.md). The [synthesis canary](data_audit/pipeline_canary.md) is not an approved training dataset. The direct soft-distillation training entrypoint remains pending; the reference scorer and PiSSA checkpoint components are retained.
 
 ## Evaluation
 
-Results are pending. Each reported metric will include the dataset, configuration, and reproduction procedure.
+OpenJev checkpoint results are pending. The earlier synthetic baseline experiment is [archived](ARCHIVE.md); it does not describe a trained OpenJev model or chat-data performance. Each checkpoint metric will include the dataset, configuration, and reproduction procedure.
 
 | Evaluation | Required context | Current result |
 | --- | --- | --- |
@@ -64,4 +70,4 @@ Working installation and loading commands will be added when the artifacts exist
 
 ## Attribution
 
-OpenJev is independent of TypeSafe AI and Qwen. It uses public research descriptions as inspiration and plans to build on the Qwen backbone. See [third-party notices](../THIRD_PARTY_NOTICES.md) for provenance, and [CITATION.cff](../CITATION.cff) for the project citation.
+OpenJev is independent of TypeSafe AI and Qwen. It uses public research descriptions as inspiration and supports a configurable backbone design; historical engineering checks used Qwen. See [third-party notices](../THIRD_PARTY_NOTICES.md) for provenance, and [CITATION.cff](../CITATION.cff) for the project citation.

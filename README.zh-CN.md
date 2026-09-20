@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-74e0c1" alt="许可证：Apache-2.0" /></a>
-  <a href="ROADMAP.md"><img src="https://img.shields.io/badge/status-design%20stage-7aa2f7" alt="当前阶段：设计" /></a>
+  <a href="ROADMAP.md"><img src="https://img.shields.io/badge/status-data%20preparation-7aa2f7" alt="当前阶段：数据准备" /></a>
   <a href="ROADMAP.md"><img src="https://img.shields.io/badge/model%20preview-coming%20soon-f5c97a" alt="模型预览版即将发布" /></a>
 </p>
 
@@ -17,10 +17,10 @@
   <a href="README.md">English</a> · 简体中文 · <a href="docs/README.md">文档</a> · <a href="ROADMAP.md">路线图</a> · <a href="CONTRIBUTING.md">参与贡献</a>
 </p>
 
-> **首个模型预览版将在几天内发布。**
+> **首个模型预览版即将发布。**
 > 预览版将提供模型权重、推理示例和初步评估，进度见[路线图](ROADMAP.md)。
 
-目前仓库包含架构设计和训练方案，代码与模型权重将随预览版发布。
+目前仓库包含架构设计、训练方案、[聊天数据流程](docs/openjev_training_pipeline.md)，以及本地语料准备、离线数据检查和评分模型工程参考。公共输入编译器、三类 CLI／HTTP 响应、PiSSA 模型与检查点组件及教师编码审计已实现；旧硬标签流程已归档；API 制题、语义审核、离线回放及本地教师采集入口已实现，训练集验收与软训练器仍待完成。正式训练模型尚未发布。
 
 ## 为什么做 OpenJev？
 
@@ -39,48 +39,59 @@ OpenJev 受 Jev 公开资料启发，与 TypeSafe AI、Qwen 没有隶属关系�
 
 ## 模型会输出什么？
 
-三个计划支持的 primitive 复用一个评分模型：
+三个 primitive 复用一个评分模型；接口已实现，模型能力仍待训练验收：
 
 | 类型 | 问题形式 | 预期输出 |
 | --- | --- | --- |
-| **Choice** | 哪个候选最符合当前输入？ | 选中的候选 ID 和完整候选概率 |
-| **Score** | 当前输入落在哪些描述性档位？ | 档位概率、加权分数和分布方差 |
+| **Choice** | 哪个候选最符合当前输入？ | 选中的候选名称和完整候选概率 |
+| **Score** | 当前输入落在哪些描述性档位？ | 档位概率、加权分数、legend 和 confidence |
 | **Noul** | 这个命题是否成立？ | 回答为真的概率 |
 
-以工单为例：
-
-```text
-状态：快递显示签收，但客户说没有收到。
-问题：首先应该交给哪个团队？
-候选：shipping / billing / returns
-
-模型 → 候选分数 → 概率分布 → 业务路由代码
-```
-
-拟定的输出格式如下，概率为示例值：
+请求采用 Jev 的 `state + questions` 结构，候选放在 `criteria` 中。
 
 ```json
 {
-  "type": "choice",
-  "selected_id": "shipping",
-  "probabilities": {
-    "shipping": 0.90,
-    "billing": 0.03,
-    "returns": 0.07
-  },
-  "top_probability": 0.90,
-  "margin": 0.83
+  "model": "openjev-preview",
+  "state": "Tracking says delivered, but I have not received my parcel.",
+  "questions": {
+    "route": {
+      "type": "choice",
+      "instructions": "Which team should handle this first?",
+      "criteria": {
+        "shipping": "Delivery and missing parcels",
+        "billing": "Charges and invoices",
+        "returns": "Returns of received items"
+      }
+    }
+  }
 }
 ```
 
-输出验证负责保证取值合法，独立评测负责衡量判断质量和工作流风险。
+响应结构如下，概率为演示值；本地接口已实现，正式训练模型尚未发布：
+
+```json
+{
+  "model": "openjev-preview",
+  "answers": {
+    "route": {
+      "type": "choice",
+      "choice": "shipping",
+      "confidence": 0.83,
+      "probabilities": {"shipping": 0.90, "billing": 0.03, "returns": 0.07}
+    }
+  },
+  "usage": {"input_tokens": 210, "output_tokens": 31}
+}
+```
+
+`confidence` 采用 OpenJev 定义的前两项概率差，不表示正确率，也不宣称与 Jev 官方数值等价。完整字段与兼容边界见[接口约定](docs/openjev_api_contract.md)。
 
 ## 技术路线
 
 ```mermaid
 flowchart LR
     A[状态与类型化问题] --> B[输入编译器]
-    B --> C[Qwen3-1.7B-Base]
+    B --> C[可配置的 causal backbone]
     C --> D[共享标量评分头]
     D --> E[按问题归一化的概率]
     E --> F[类型化输出]
@@ -89,7 +100,7 @@ flowchart LR
 
 ### 候选评分
 
-保留 Qwen3-1.7B-Base 的 embedding 和 Transformer 层，增加结构 token 与共享的 **2048 → 1** 标量评分头。从输入中的 `DECISION` 位置读取 hidden state，不执行词表 LM head，不生成自由文本。
+基座型号可配置，保留所选模型的 embedding 和 Transformer 层，增加结构 token 与共享的 **hidden_size → 1** 标量评分头。每次实验固定 checkpoint 和 tokenizer。从输入中的 `DECISION` 位置读取 hidden state，不执行词表 LM head，不生成自由文本。
 
 候选名称和描述在运行时输入，同一个评分头可以处理不同任务定义。
 
@@ -98,11 +109,11 @@ flowchart LR
 - **A：独立候选。**每项评分只读取状态、问题和自身描述。
 - **B：全候选可见。**每项评分还能读取完整候选集合，用于相对比较和动态 `other` 语义。
 
-在小规模 pilot 中比较未见任务、动态 taxonomy、重叠类别和兜底选项，再选择 Choice 结构。Score 使用独立描述档位，Noul 使用 true／false 分支。
+首轮采用 B；A 留作后续对照，考察未见任务、动态 taxonomy、重叠类别和兜底选项。Score 使用独立描述档位，Noul 使用 true／false 分支。
 
 ### 概率监督
 
-混合经验证硬标签、实际事件结果、已知条件分布、适当降权的教师监督和经审核人类分布。主目标为按题交叉熵，通过消融决定是否加入 Brier 和一致性损失。
+API 从已有对话构造问题和选项，解析 JSON 并检查质量；本地教师先推理，再提供完整候选概率，学生直接进行 PiSSA 软蒸馏。教师思维链和临时编码不进入学生输入。新的制题和本地概率采集已有执行入口，保存原始响应、思考轨迹和 logits 供审计。[小试报告](docs/data_audit/pipeline_canary.md)记录实际覆盖与拒收样例；目前还没有通过训练验收的软标签数据集。
 
 模型训练、温度拟合、工作流阈值选择和最终测试使用分离的数据。分布集中不等于正确率高，单题校准也不自动保证整个工作流可靠。
 
@@ -114,23 +125,19 @@ flowchart LR
 
 ## 训练路线图
 
-| 阶段 | 主要工作 | 初始数据预算 |
+| 阶段 | 工作 | 首版安排 |
 | --- | --- | --- |
-| 定义任务 | 固定任务语义、数据划分、工作流与基线 | 代表性真实样本和规则样例 |
-| 决策适配 | 训练评分头、结构 token 与问题理解能力 | 2 万–5 万条高质量决策题 |
-| Pilot | 比较候选结构、初始化和监督来源 | 累计约 10 万条训练题 |
-| 工程验证 | 验证共享计算等价性与性能 | Pilot 数据和边界样例 |
-| 主训练 | 扩展任务覆盖、蒸馏能力 | 累计 50 万–200 万条训练题 |
-| 难例改进 | 经验证难例与普通数据回放 | 10 万–30 万难例加回放 |
-| 校准与验收 | 拟合温度、选业务阈值、测试冻结系统 | 独立校准、策略和测试数据 |
+| 1. 准备数据 | 真实聊天 → API 制题 → JSON／语义检查 → 本地教师 thinking 与完整概率 → 冻结 | 先验收约 100 条，再扩至 1K–3K，覆盖 2–255 个候选 |
+| 2. PiSSA 直接软蒸馏 | 从选定基座联合训练低秩参数、评分头与结构 token，只用教师分布监督 | 不做硬标签预热 |
+| 3. 验证 | 开发评估、独立校准、策略选择和最终测试 | 报告质量、成本与支持范围 |
 
-上表为计划预算。一个 decision 指一道带有完整候选集合的问题，预览版模型卡会记录实际训练数据和完成的阶段。
+首版执行 **1 → 2 → 3**，RLCD 留作后续研究。标准 PiSSA 冻结残差基底，通过低秩项更新有效主干权重；不单独预热评分头，也不先训练 LoRA。具体参数范围与实现缺口见[训练计划](docs/openjev_training_pipeline.md)。
 
 ## 开始阅读
 
-从[总体设计](docs/openjev_qwen3_design.md)开始，再阅读[模型架构](docs/openjev_model_architecture.md)和[训练流程](docs/openjev_training_pipeline.md)。详细研究文档目前为中文，欢迎贡献英文翻译。
+从[总体设计](docs/openjev_design.md)开始，再阅读[模型架构](docs/openjev_model_architecture.md)和[训练流程](docs/openjev_training_pipeline.md)。详细研究文档目前为中文，欢迎贡献英文翻译。
 
-模型下载地址和推理说明将随预览版发布，版本信息见[模型卡](docs/MODEL_CARD.md)。
+本地推理命令见[执行说明](docs/execution.md)，模型下载地址将随预览版发布，版本信息见[模型卡](docs/MODEL_CARD.md)。
 
 本地文档检查仅依赖 **Python 3.10 或更新版本**：
 
@@ -142,9 +149,11 @@ python3 scripts/check_docs.py
 
 | 文档 | 内容 |
 | --- | --- |
-| [总体设计](docs/openjev_qwen3_design.md) | 研究取舍、能力边界和里程碑 |
+| [总体设计](docs/openjev_design.md) | 研究取舍、能力边界和里程碑 |
 | [模型架构](docs/openjev_model_architecture.md) | 输入编译、A／B 结构、attention、读出及推理 |
-| [训练流程](docs/openjev_training_pipeline.md) | 九个执行步骤、八类数据配方、目标与退出条件 |
+| [训练流程](docs/openjev_training_pipeline.md) | 三个阶段、API 制题、本地教师概率与 PiSSA 软蒸馏 |
+| [训练数据格式](docs/openjev_training_data.md) | 无标签题库、教师分布、来源记录与回放 |
+| [接口约定](docs/openjev_api_contract.md) | Jev 输入输出字段、示例与兼容边界 |
 | [路线图](ROADMAP.md) | 模型发布承诺和长期工作 |
 | [模型卡](docs/MODEL_CARD.md) | 模型状态、训练信息、评估和局限 |
 | [发布指南](docs/RELEASING.md) | 可复现发布需要的产物与证据 |

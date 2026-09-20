@@ -1,0 +1,159 @@
+{
+  "version": "source-pool-config-v1",
+  "seed": 20260920,
+  "target_groups": 2000,
+  "reservoir_multiplier": 4,
+  "max_prefix_characters": 24000,
+  "max_record_characters_for_sampling": 100000,
+  "max_prefixes_per_conversation": 2,
+  "minhash_permutations": 32,
+  "minhash_bands": 8,
+  "near_duplicate_jaccard": 0.85,
+  "sources": [
+    {
+      "id": "ComplexInstruction_moss_zh",
+      "file": "HanChat/OpenQA/data/train/ComplexInstruction_moss_zh.jsonl",
+      "upstream_family_hint": "moss",
+      "quota": 450,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "3ae9f9c4518cb8412814d37cc75d526ec32687d395c71f31eaa267cd0f7651da"
+    },
+    {
+      "id": "Continue_moss_zh",
+      "file": "HanChat/Dialogue/data/train/Continue_moss_zh.jsonl",
+      "upstream_family_hint": "moss",
+      "quota": 150,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "d5505ca79588ee3c42d6b4ada2d85dabb263e61fac76b4d8995613f3b43aa548"
+    },
+    {
+      "id": "Switching_moss_zh",
+      "file": "HanChat/Dialogue/data/train/Switching_moss_zh.jsonl",
+      "upstream_family_hint": "moss",
+      "quota": 150,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "1eb12fed5602d0b1dfb12969e83ec374cb10b8420f0e87c3e511af67725f7803"
+    },
+    {
+      "id": "Hello_SimpleAI_HC3_zh",
+      "file": "HanChat/OpenQA/data/train/Hello_SimpleAI_HC3_zh.jsonl",
+      "upstream_family_hint": "hc3",
+      "quota": 250,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "023497d30b8c9fd6617146e6afbf0700a83ef0cd19833470fb3beeffcd995c16"
+    },
+    {
+      "id": "sahil2801_code_instructions_120k",
+      "file": "HanChat/CodeGeneration/data/train/sahil2801_code_instructions_120k.jsonl",
+      "upstream_family_hint": "code_instructions",
+      "quota": 250,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "9e7ad1baaa056d11c8565925e4cc44fc081b941ee6690c7298cbb2273a7c11d3"
+    },
+    {
+      "id": "MRC_firefly_zhs",
+      "file": "HanChat/MRC/data/train/MRC_firefly_zhs.jsonl",
+      "upstream_family_hint": "firefly",
+      "quota": 200,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "92e0c141bbbe0a6bcdbf64d146eb826a6a932d999c67d434eb7c5693f16b2474"
+    },
+    {
+      "id": "NLI_firefly_zhs",
+      "file": "HanChat/NLI/data/train/NLI_firefly_zhs.jsonl",
+      "upstream_family_hint": "firefly",
+      "quota": 100,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "75f6f603cdda286b6affadc2355b8166fdfc994a046fac7344af0958e7bf5cb3"
+    },
+    {
+      "id": "TextMatching_firefly_zhs",
+      "file": "HanChat/TextMatching/data/train/TextMatching_firefly_zhs.jsonl",
+      "upstream_family_hint": "firefly",
+      "quota": 100,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "3228645af4b262f61accde5a9d66b8726eec6401aa6ffb8c1107aec2451b4bf1"
+    },
+    {
+      "id": "SentimentAnalyze_firefly_zhs",
+      "file": "HanChat/SentimentAnalyze/data/train/SentimentAnalyze_firefly_zhs.jsonl",
+      "upstream_family_hint": "firefly",
+      "quota": 50,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "6e0724c2738c4e11126a53144bad062798e09c2e7baf1aa28f2dbc37b958fd4c"
+    },
+    {
+      "id": "classification_dolly_en",
+      "file": "HanChat/Classification/data/train/classification_dolly_en.jsonl",
+      "upstream_family_hint": "dolly",
+      "quota": 50,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "2b61ad828720bb787448a2cd25b9d52bd428d6576e4560e2945dd05894d984ee"
+    },
+    {
+      "id": "closed_qa_dolly_en",
+      "file": "HanChat/ClosedQA/data/train/closed_qa_dolly_en.jsonl",
+      "upstream_family_hint": "dolly",
+      "quota": 75,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "7c4160a63a1eb66a36227cbd6ffda986216c1b587e7f7749be8d42705596ec38"
+    },
+    {
+      "id": "information_extraction_dolly_en",
+      "file": "HanChat/InformationExtraction/data/train/information_extraction_dolly_en.jsonl",
+      "upstream_family_hint": "dolly",
+      "quota": 75,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "2c4c8c3ea01d56df93e995cc7e8432930408bded1343eeb015977e868d704cd8"
+    },
+    {
+      "id": "translation_samsum_en",
+      "file": "HanChat/Summary/data/train/translation_samsum_en.jsonl",
+      "upstream_family_hint": "samsum",
+      "quota": 100,
+      "local_split": "train",
+      "upstream_split": "unknown_after_conversion",
+      "license_status": "unresolved_per_source",
+      "human_authorship": "unverified",
+      "expected_sha256": "b33e48af9aca28094f041163000e2d76ff50c46bbf5fbcc312489335175f59f1"
+    }
+  ],
+  "scope": "Full exact grouping across these 13 files; lexical near-duplicate search across retained candidate representatives and exploration examples only. Not all HanChat or cross-language semantic deduplication.",
+  "split_status": "unassigned; no official train/dev/calibration/policy/test allocation in this step"
+}

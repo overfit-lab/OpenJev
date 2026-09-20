@@ -9,7 +9,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-74e0c1" alt="License: Apache-2.0" /></a>
-  <a href="ROADMAP.md"><img src="https://img.shields.io/badge/status-design%20stage-7aa2f7" alt="Status: design stage" /></a>
+  <a href="ROADMAP.md"><img src="https://img.shields.io/badge/status-data%20preparation-7aa2f7" alt="Status: data preparation" /></a>
   <a href="ROADMAP.md"><img src="https://img.shields.io/badge/model%20preview-coming%20soon-f5c97a" alt="Model preview: coming soon" /></a>
 </p>
 
@@ -17,10 +17,10 @@
   English · <a href="README.zh-CN.md">简体中文</a> · <a href="docs/README.md">Documentation</a> · <a href="ROADMAP.md">Roadmap</a> · <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
-> **First model preview — within the next few days.**
+> **First model preview — coming soon.**
 > The preview will include model weights, inference examples, and initial evaluation results. See the [roadmap](ROADMAP.md).
 
-The repository currently contains the architecture and training plans. Code and model weights are coming with the preview.
+The repository contains architecture and training plans, a [conversation data pipeline](docs/openjev_training_pipeline.md), and local corpus preparation, offline data checks, and a reference scorer. The public input compiler, typed CLI/HTTP responses, PiSSA model/checkpoint components, and teacher codebook audit are implemented. The old hard-label pipeline is archived. API question synthesis, semantic review, offline replay and local teacher collection are implemented; training-set approval and the soft-target trainer are still pending. A formally trained OpenJev model has not been released.
 
 ## Why OpenJev?
 
@@ -39,48 +39,59 @@ OpenJev is an independent project inspired by Jev's public descriptions. It has 
 
 ## What does a decision look like?
 
-Three planned primitives share one scoring model:
+Three primitives share one scoring model; their interfaces are implemented, with model quality still to be validated:
 
 | Primitive | Question shape | Intended output |
 | --- | --- | --- |
-| **Choice** | Which of these options fits? | Selected option ID and a probability for every option |
-| **Score** | Where does this input fall on described levels? | Level probabilities, a weighted score, and distribution variance |
+| **Choice** | Which of these options fits? | Selected option name and a probability for every option |
+| **Score** | Where does this input fall on described levels? | Level probabilities, weighted score, legend, and confidence |
 | **Noul** | Is this statement true? | Probability of the answer being yes |
 
-For a support ticket, the conceptual flow is:
-
-```text
-State:      "Tracking says delivered, but I haven't received my parcel."
-Question:   "Which team should handle this first?"
-Candidates: shipping / billing / returns
-
-Model → candidate scores → probabilities → routing code
-```
-
-Proposed output format, with example probabilities:
+Requests follow Jev’s `state + questions` structure, with options in `criteria`.
 
 ```json
 {
-  "type": "choice",
-  "selected_id": "shipping",
-  "probabilities": {
-    "shipping": 0.90,
-    "billing": 0.03,
-    "returns": 0.07
-  },
-  "top_probability": 0.90,
-  "margin": 0.83
+  "model": "openjev-preview",
+  "state": "Tracking says delivered, but I have not received my parcel.",
+  "questions": {
+    "route": {
+      "type": "choice",
+      "instructions": "Which team should handle this first?",
+      "criteria": {
+        "shipping": "Delivery and missing parcels",
+        "billing": "Charges and invoices",
+        "returns": "Returns of received items"
+      }
+    }
+  }
 }
 ```
 
-Output validation ensures legal values; held-out evaluation measures decision quality and workflow risk.
+Response shape with illustrative probabilities; the local API is implemented, and no trained model has been released:
+
+```json
+{
+  "model": "openjev-preview",
+  "answers": {
+    "route": {
+      "type": "choice",
+      "choice": "shipping",
+      "confidence": 0.83,
+      "probabilities": {"shipping": 0.90, "billing": 0.03, "returns": 0.07}
+    }
+  },
+  "usage": {"input_tokens": 210, "output_tokens": 31}
+}
+```
+
+`confidence` uses OpenJev’s top-two probability margin. It is not an accuracy estimate or a reproduction of Jev’s formula. See the [API contract](docs/openjev_api_contract.md) for fields and compatibility limits.
 
 ## Technical approach
 
 ```mermaid
 flowchart LR
     A[State and typed questions] --> B[Input compiler]
-    B --> C[Qwen3-1.7B-Base]
+    B --> C[Configurable causal backbone]
     C --> D[Shared scalar scoring head]
     D --> E[Per-question probabilities]
     E --> F[Typed outputs]
@@ -89,7 +100,7 @@ flowchart LR
 
 ### Candidate scoring
 
-Keep the Qwen3-1.7B-Base embeddings and Transformer blocks. Add structural tokens and a shared **2048 → 1** scoring head. Read each candidate's hidden state at an input-side `DECISION` position; skip the vocabulary LM head and free-text generation.
+Keep the selected backbone’s embeddings and Transformer blocks. Add structural tokens and a shared **hidden_size → 1** scoring head. Pin the checkpoint and tokenizer for each experiment. Read each candidate's hidden state at an input-side `DECISION` position; skip the vocabulary LM head and free-text generation.
 
 Candidate names and descriptions are supplied at runtime, so the same head can score different task definitions.
 
@@ -98,11 +109,11 @@ Candidate names and descriptions are supplied at runtime, so the same head can s
 - **A — independent candidates:** each score sees the state, question, and its own candidate description.
 - **B — full candidate context:** each score also sees the complete candidate set, enabling relative comparisons and dynamic `other` semantics.
 
-The pilot will compare both structures on unseen tasks, changing taxonomies, overlapping categories, and fallback options. Score uses independently described levels; Noul uses true/false branches.
+The first run uses B; A remains a later comparison on unseen tasks, changing taxonomies, overlapping categories, and fallback options. Score uses independently described levels; Noul uses true/false branches.
 
 ### Probability supervision
 
-Use verified hard labels, observed outcomes, known conditional distributions, carefully weighted teacher supervision, and audited human distributions. Train with per-question cross-entropy; evaluate optional Brier and consistency losses through ablations.
+An LLM API constructs questions and options from existing conversations. After JSON and semantic validation, a local teacher reasons and scores every candidate; the student learns directly from these soft distributions with PiSSA. Teacher reasoning and temporary answer codes stay out of student inputs. Question synthesis and local collection have runnable entrypoints, with raw responses, reasoning traces and logits retained for audit. The [canary report](docs/data_audit/pipeline_canary.md) records actual coverage and rejected examples. No soft-label dataset has been approved for training.
 
 Separate model training, temperature fitting, workflow threshold selection, and final testing. A distribution's concentration is not its probability of being correct, and separately calibrated questions do not automatically form a reliable workflow.
 
@@ -114,23 +125,19 @@ We will check reference equivalence for logits, loss, and gradients, then measur
 
 ## Training roadmap
 
-| Stage | Work | Initial data budget |
+| Stage | Work | First preview |
 | --- | --- | --- |
-| Task definition | Freeze task semantics, data splits, workflows, and baselines | Representative real cases and rule-based examples |
-| Adaptation | Learn the scoring head, structural tokens, and decision instructions | 20K–50K high-quality decisions |
-| Pilot | Compare candidate structures, initialization, and supervision | About 100K unique training decisions |
-| Engineering | Check shared-computation equivalence and performance | Pilot examples and boundary cases |
-| Main training | Expand task coverage and distill capabilities | 0.5M–2M unique training decisions |
-| Refinement | Address verified hard cases with ordinary-data replay | 100K–300K hard cases plus replay |
-| Calibration and evaluation | Fit temperature, select workflow thresholds, test the frozen system | Separate calibration, policy, and test sets |
+| 1. Prepare data | Chat extraction → API question construction → JSON/semantic checks → local teacher reasoning and complete probabilities → freeze | Review about 100 decisions before expanding to 1K–3K; cover 2–255 candidates |
+| 2. Direct PiSSA distillation | Jointly train low-rank parameters, scoring head and structural tokens using teacher distributions | No hard-label warmup |
+| 3. Validate | Development evaluation, independent calibration, policy selection and final testing | Report quality, cost and supported scope |
 
-The budgets above are planned. A decision is one question with its complete candidate set. The preview's model card will report its actual training data and completed stages.
+The first preview follows **1 → 2 → 3**. RLCD is future research outside these stages. Standard PiSSA freezes the residual base while its low-rank component changes the effective backbone weights. There is no separate head warmup or preceding LoRA run. Implementation gaps and parameter scope are recorded in the [training plan](docs/openjev_training_pipeline.md).
 
 ## Getting started
 
-Start with the [design overview](docs/openjev_qwen3_design.md), then read the [architecture](docs/openjev_model_architecture.md) and [training pipeline](docs/openjev_training_pipeline.md). The detailed research documents are currently in Chinese; contributions to English translations are welcome.
+Start with the [design overview](docs/openjev_design.md), then read the [architecture](docs/openjev_model_architecture.md) and [training pipeline](docs/openjev_training_pipeline.md). The detailed research documents are currently in Chinese; contributions to English translations are welcome.
 
-Model downloads and inference instructions will accompany the preview. Release information lives in the [model card](docs/MODEL_CARD.md).
+Local inference commands are in the [execution guide](docs/execution.md); model downloads will accompany the preview. Release information lives in the [model card](docs/MODEL_CARD.md).
 
 Check the documentation locally with **Python 3.10+**; no extra dependencies are needed:
 
@@ -142,9 +149,11 @@ python3 scripts/check_docs.py
 
 | Document | Contents |
 | --- | --- |
-| [Design overview](docs/openjev_qwen3_design.md) | Research decisions, constraints, and milestones |
+| [Design overview](docs/openjev_design.md) | Research decisions, constraints, and milestones |
 | [Model architecture](docs/openjev_model_architecture.md) | Input compilation, A/B structures, attention, scoring, and inference |
-| [Training pipeline](docs/openjev_training_pipeline.md) | Nine execution steps, eight data recipes, objectives, and exit criteria |
+| [Training pipeline](docs/openjev_training_pipeline.md) | Three stages, API question construction, local teacher probabilities, and direct PiSSA distillation |
+| [Training data format](docs/openjev_training_data.md) | Unlabeled questions, teacher distributions, provenance, and replay |
+| [API contract](docs/openjev_api_contract.md) | Jev request/response fields and OpenJev compatibility limits |
 | [Roadmap](ROADMAP.md) | Model preview commitment and longer-term work |
 | [Model card](docs/MODEL_CARD.md) | Model status, training details, evaluation, and limitations |
 | [Release guide](docs/RELEASING.md) | Artifacts and evidence required for a reproducible release |

@@ -1,8 +1,8 @@
 # OpenJev 模型架构详解
 
-日期：2026-09-19。状态：架构设计，待实现与实验验证。
+更新：2026-09-20。状态：普通评分参考已通过工程检查；三种 primitive 的统一接口及可配置基座已实现并通过小模型工程测试，正式能力待训练验证。
 
-本文展开[总体设计](openjev_qwen3_design.md)中的模型、输入编译、前向计算、输出语义和工程约束。数据制作及训练顺序见[训练流程](openjev_training_pipeline.md)。两份细化文档沿用总体设计的路线：先验证普通 causal forward 的决策能力，再选择 Choice 候选结构，最后优化共享计算。
+本文展开[总体设计](openjev_design.md)中的模型、输入编译、前向计算、输出语义和工程约束。数据制作及训练顺序见[训练流程](openjev_training_pipeline.md)。两份细化文档沿用总体设计的路线：首轮用普通 causal forward、Choice B 与 PiSSA 联合微调验证决策能力；RLCD 首版跳过，验证后再决定扩量与共享计算优化。
 
 ## 1. 模型究竟要学习什么
 
@@ -32,9 +32,9 @@ OpenJev 学习一个由问题和候选定义条件化的决策函数：
 ```mermaid
 flowchart TD
     A[状态与 typed questions] --> B[验证与确定性输入编译]
-    B --> C[Qwen3-1.7B-Base backbone]
+    B --> C[可配置的 causal backbone]
     C --> D[读取各 DECISION 位置的 hidden state]
-    D --> E[共享的 2048 到 1 标量评分头]
+    D --> E[共享的 hidden_size 到 1 标量评分头]
     E --> F[按问题分组与温度校准]
     F --> G[FP32 softmax]
     G --> H[Choice / Score / Noul 后处理]
@@ -47,9 +47,11 @@ flowchart TD
 
 ## 3. Backbone：保留什么，新增什么
 
-主线 checkpoint 为 `Qwen/Qwen3-1.7B-Base`。总体设计记录的配置如下；实现时必须固定 revision 并核对实际加载的 config。
+基座型号通过运行参数指定，不限定为某个 Base 或 Instruct checkpoint。实际训练须固定公开标识、revision 和 tokenizer，读取 config.hidden_size 构造评分头，并校验 PiSSA 注入模块、embedding 扩展及保存重载。基座元数据与 embedding 保存位置已改为按实际模型处理，PiSSA 默认注入 all-linear；目前通过小型 Qwen／Llama 检查，更换其他架构仍需验证，不宣称支持任意模型。
 
-| 配置项 | 设计采用的值 |
+下表仅记录历史 Qwen3-1.7B-Base 工程检查配置，用于算例，不是新架构要求：
+
+| 配置项 | 历史算例值 |
 | --- | --- |
 | Transformer 层数 | 28 |
 | hidden size | 2048 |
@@ -64,38 +66,39 @@ flowchart TD
 保留原始 embedding、Transformer 层、MLP、各归一化层以及最终 RMSNorm。新增结构边界 token 的 embedding，以及一个共享线性层：
 
 ```text
-w ∈ R^2048
+w ∈ R^hidden_size
 z = wᵀh
 ```
 
 所有 primitive、问题和候选使用同一组 w。问题类型和候选语义通过输入影响 hidden state，不通过固定类别编号选择不同 head。因此新增一个业务类别只需要提供名称和描述，不需要扩展分类头。
 
-不执行原来的词表输出投影，不调用 `generate`。由于原 LM head 与输入 embedding 绑定，这主要减少词表投影计算，不能把同一份 embedding 权重当成可删除的参数。
+不执行原来的词表输出投影，不调用 `generate`。若所选模型绑定 LM head 与输入 embedding，这主要减少词表投影计算，不能将同一份 embedding 权重当成可删除参数。
 
-首版不改成双向 encoder，不增加独立 cross-attention、diffusion 或 latent reasoning 模块。普通 causal 参考计算保留了权重迁移和数值对照的基础。Base 的指令理解必须通过决策训练获得并验证，不能借用后训练版的能力假设。
+首版不改成双向 encoder，不增加独立 cross-attention、diffusion 或 latent reasoning 模块。普通 causal 参考计算保留了权重迁移和数值对照的基础。所选 checkpoint 的指令理解与候选判断能力均须实测，不能根据 Base／Instruct 名称推断效果。PiSSA 的低秩参数、共享头与结构 token 联合更新；标准方案冻结其余残差基底。
 
 ## 4. 输入契约与编译器
 
-以下为拟定的逻辑输入格式，HTTP API 将在实现阶段确定。
+对外采用 Jev 的 state／questions／criteria 结构，目标端点为 POST /v1/systemone。完整字段、confidence 差异及实现范围见[接口约定](openjev_api_contract.md)。本地顺序执行 HTTP 参考服务已提供，尚无公开部署或正式模型。
 
 ```json
 {
+  "model": "openjev-preview",
   "state": "快递显示签收，但客户说没有收到。",
   "questions": {
     "route": {
       "type": "choice",
       "instructions": "根据客户当前问题，首先交给哪个团队？",
-      "candidates": [
-        {"id": "shipping", "text": "物流、签收异常与丢件"},
-        {"id": "billing", "text": "扣费、账单与发票"},
-        {"id": "returns", "text": "已收到商品后的退换货"}
-      ]
+      "criteria": {
+        "shipping": "物流、签收异常与丢件",
+        "billing": "扣费、账单与发票",
+        "returns": "已收到商品后的退换货"
+      }
     }
   }
 }
 ```
 
-`route` 只用于请求与响应对应，不送入模型。这里候选 `id` 同时承担有语义的名称，例如 shipping；名称与 text 一起输入模型。如果未来要支持不透明的数据库 ID，应增加单独的语义名称字段并明确版本，不能假定任意 ID 自带分类含义。
+`route` 只用于请求与响应对应，不送入模型。criteria 中 shipping 等名称和描述共同输入模型。训练标签直接使用 target[问题名].choice 映射，不另存一套候选 ID；不能将随机编号自动当作名称。当前 jev-fields-v1 编译器已读取名称与描述，旧 text-only 记录被显式拒绝。
 
 Score 的候选在内部表示为有序档位，外部序号从 0 开始，只用于输出映射。Noul 的内部候选是 true 与 false 的完整语义描述。
 
@@ -103,7 +106,7 @@ Score 的候选在内部表示为有序档位，外部序号从 0 开始，只�
 
 1. 校验 primitive、候选数、唯一 ID、字符串／结构化值格式和长度。首版服务契约建议 Choice 接受 2–255 项、Score 接受 2–10 档，Noul 固定二元；单候选决策交由调用方代码直接处理。
 2. state、instructions、描述中的 object 使用固定序列化规则；普通 list 保留顺序。Choice 的集合规范化是单独规则，不改变 Score 的档位顺序。
-3. Choice B 的完整候选列表按唯一 ID 的 Unicode 码点顺序排列，规则写入编译器版本。更改请求中的枚举顺序不会改变这个前缀。
+3. Choice B 的完整候选列表按语义名称的 Unicode 码点顺序排列，规则写入编译器版本。更改请求中的枚举顺序不会改变这个前缀。
 4. 使用专用结构 token 划定状态、问题和候选边界。文中的 `[STATE]` 等只是易读表示；实现时须注册并保存实际 token ID。
 5. 用户文本中出现结构 token 的字面量时，按普通文本编码或转义，不能转成编译器的控制 token。
 6. 超过路径长度或总打包预算时返回明确错误，或使用预先约定且可追踪的切分流程；不能静默截断证据。
@@ -188,7 +191,7 @@ B 仍可以共享前缀：状态共享一次，同一问题的完整候选列表
 | 修改一个候选的影响 | 其他 raw logits 不变 | 可以影响其他 raw logits |
 | 顺序处理 | 分支路径位置不依赖枚举顺序 | 还需规范化完整列表 |
 
-在约 10 万 decision 的 pilot 内比较 A／B。采用相同训练记录、目标和初始权重控制，记录训练 token、计算预算及每题成本，避免把更大预算误当成架构收益。重点查看动态 taxonomy、兜底、重叠类别和未见任务的分组指标。
+首轮固定 B；初版验证后再按需要比较 A／B，不以十万题为启动条件。采用相同训练记录、目标和初始权重控制，记录训练 token、计算预算及每题成本，避免把更大预算误当成架构收益。重点查看动态 taxonomy、兜底、重叠类别和未见任务的分组指标。
 
 最终发布的 checkpoint 必须声明所用 Choice 模式和支持范围。不能训练后在 A／B 间随意切换序列化；切换是输入分布变化，需要重新验证并校准。Score 保持档位独立，Noul 保持 true／false 双分支；Choice 选 B 不要求它们也输入完整列表。
 
@@ -207,7 +210,7 @@ S：固定约定 + state
     └── C22：档位描述 1 + DECISION
 ```
 
-这里的节点是一段 token，不是神经网络中的独立模块。所有节点通过相同的 28 层 Transformer，只是 attention 可见范围不同。
+这里的节点是一段 token，不是神经网络中的独立模块。所有节点通过同一个 backbone 的全部 Transformer 层，只是 attention 可见范围不同。
 
 ### 6.2 Attention mask
 
@@ -276,7 +279,7 @@ for question in questions:
     probabilities[question.id] = exp(log_p_j)
 ```
 
-训练时 T=1，主损失直接使用 FP32 的 log_softmax，避免先算概率再取 log 导致下溢。推理和校准使用保存的正温度。共享 scalar bias 会在 softmax 中消掉，首版不添加。
+直接软蒸馏时学生 T=1，以冻结教师分布 q 计算 -sum(q*log p)，使用 FP32 log_softmax 避免先算概率再取 log 导致下溢。完整软训练器尚待接入；旧硬标签训练器已归档，评分器的软分布梯度与检查点检查保留。推理和校准使用保存的正温度。共享 scalar bias 会在 softmax 中消掉，首版不添加。
 
 若采用 padding 的矩阵布局，无效候选在 softmax 前排除。不能对全是无效项的一行执行 softmax。出现 NaN／Inf、重复 ID 或候选映射缺失时返回错误，不能偷偷换成均匀分布制造正常响应。
 
@@ -285,18 +288,18 @@ for question in questions:
 ### 8.1 Choice
 
 ```text
-selected_id = argmax_k p_k 对应的输入 ID
+choice = argmax_k p_k 对应的 criteria 名称
 top_probability = max_k p_k
 margin = 第一大概率 - 第二大概率
 ```
 
-返回全部有效候选概率和 selected_id。精确并列时按规范 ID 顺序决定，避免请求枚举顺序影响结果。确定性 argmax 不等于承诺跨 GPU、精度或软件版本逐 bit 一致。
+在 answers[问题名] 返回 type、choice、confidence 和全部有效候选 probabilities。新版训练标签使用 target[问题名].choice，并由同一编译器映射为监督索引。精确并列时按规范名称顺序决定，避免请求枚举顺序影响结果。确定性 argmax 不等于承诺跨 GPU、精度或软件版本逐 bit 一致。
 
 候选不覆盖真实类别时，softmax 仍会归一化为 1。是否支持兜底、未知或证据不足必须来自任务定义；不能由服务层擅自新增类别。
 
 ### 8.2 Score
 
-对于 K 个有序描述档位，外部编号为 k=0…K-1：
+Score 的编译和输出已实现，实际能力尚未完成训练验收。响应字段为 type、score、confidence、legend 和 probabilities；legend／probabilities 使用字符串档位键。对于 K 个有序描述档位，外部编号为 k=0…K-1：
 
 ```text
 score = Σ_k k p_k
@@ -312,7 +315,7 @@ P(level >= b) = Σ_{k >= b} p_k
 
 ### 8.3 Noul
 
-根据 instructions 及可选 criteria 构造 true／false 两个分支，返回 p_true。若 z_true、z_false 为两项分数，则：
+外部 Noul 只提供 type 与 instructions，不使用 criteria。内部构造 true／false 两个分支，在 answers[问题名] 返回 {type: "noul", noul: p_true}，不附加 confidence。若 z_true、z_false 为两项分数，则：
 
 ```text
 p_true = sigmoid((z_true-z_false)/T_noul)
@@ -321,6 +324,8 @@ p_true = sigmoid((z_true-z_false)/T_noul)
 这是二元 softmax 的等价形式，不需要第三个 head。Noul=0.5 表示两种结果的预测概率接近，不代表“中等程度”。不同请求中问 A 和 not A 并不自动保证互补，需要专门的数据与评估。
 
 ## 9. 不确定性与后校准
+
+为对齐外部字段，Choice／Score 的 confidence 使用 OpenJev 明确定义的 top2_margin_v1（第一与第二大概率之差）。它只表达分布区分程度，不是正确率，也不是官方公式的复现；方法随模型包版本记录，已有 Jev 阈值不能直接迁移。详见[接口约定](openjev_api_contract.md)。
 
 诊断量 `distribution_concentration` 定义为：
 
@@ -401,6 +406,8 @@ attention： O(S² + Σ_j(Q_j S + Q_j²)
 
 ## 13. 依据与边界
 
-总体设计中保存了 [Qwen Base 模型卡](https://huggingface.co/Qwen/Qwen3-1.7B-Base)及 [config](https://huggingface.co/Qwen/Qwen3-1.7B-Base/blob/main/config.json)、TypeSafe 的 [Choice](https://docs.typesafe.ai/primitives/choice)、[Score](https://docs.typesafe.ai/primitives/score) 与 [Confidence](https://docs.typesafe.ai/confidence)资料入口。本地背景资料为 [Jev 简介](jev_info.md)和[官方发布文章](jev_offical.md)。本文以已审阅资料和总体设计为依据，正式实现应锁定具体 revision。
+总体设计中保存了 [Qwen Base 模型卡](https://huggingface.co/Qwen/Qwen3-1.7B-Base)及 [config](https://huggingface.co/Qwen/Qwen3-1.7B-Base/blob/main/config.json)、TypeSafe 的 [Choice](https://docs.typesafe.ai/primitives/choice)、[Score](https://docs.typesafe.ai/primitives/score) 与 [Confidence](https://docs.typesafe.ai/confidence)资料入口。Jev 简介与发布文章的链接见[研究参考](references.md)。本文以已审阅资料和总体设计为依据，正式实现应锁定具体 revision。
 
 运行时候选、typed 输出和概率接口是对公开行为的借鉴；共享标量头、A／B 对照、树形布局、softmax 与温度校准是 OpenJev 的具体设计选择。没有证据说明它们等同于 Jev 私有架构、parallel sampler 或 RLCD。
+
+三阶段主线为准备数据 → PiSSA 直接软蒸馏 → 验证。阶段 2 仅使用教师分布监督，不做硬标签预热或混合；教师 thinking 和单 token 双字母编码只用于采集，学生公共输入输出不变。单次／多次思考与温度配方、参数范围及实现差距见[训练计划](openjev_training_pipeline.md)。旧训练器已归档，新的软监督入口尚待实现。

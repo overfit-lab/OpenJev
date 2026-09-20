@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SKIP_DIRS = {
     ".git", ".venv", "venv", "node_modules", "__pycache__",
     "data", "datasets", "checkpoints", "models", "outputs", "runs",
-    "wandb", "artifacts", "build", "dist",
+    "wandb", "artifacts", "build", "dist", "trash",
 }
 MARKDOWN_LINK = re.compile(r"!?\[[^\]\n]*\]\(\s*(<[^>]+>|[^\s)]+)(?:\s+[^)]*)?\)")
 HTML_LINK = re.compile(r"\b(?:href|src)\s*=\s*['\"]([^'\"]+)['\"]", re.I)

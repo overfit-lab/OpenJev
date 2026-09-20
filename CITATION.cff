@@ -9,11 +9,11 @@ abstract: >-
   OpenJev studies typed probabilistic decisions through runtime-defined
   candidates, shared scalar scoring, probability supervision, and
   independent calibration. The repository provides the architecture
-  and training plans for the project.
+  and training plans, reference scorer, and data synthesis tools.
 license: Apache-2.0
 keywords:
   - decision models
   - probabilistic prediction
   - calibration
   - structured outputs
-  - Qwen3
+  - knowledge distillation

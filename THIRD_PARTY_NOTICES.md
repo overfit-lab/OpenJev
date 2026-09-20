@@ -4,20 +4,15 @@ The root [Apache-2.0 license](LICENSE) applies to original OpenJev contributions
 
 ## TypeSafe AI and Jev research material
 
-The following existing files contain third-party text collected as research references:
+Official source links are collected in [research references](docs/references.md), including TypeSafe AI's website and Diogo Almeida's “Introducing System One Models & Jev.” Earlier full-text copies have been moved to a local, Git-ignored archive and are no longer part of the current source tree.
 
-| File | Attribution and source |
-| --- | --- |
-| [docs/jev_info.md](docs/jev_info.md) | TypeSafe AI website material describing Jev; source: [typesafe.ai](https://typesafe.ai/) |
-| [docs/jev_offical.md](docs/jev_offical.md) | “Introducing System One Models & Jev,” attributed in the text to Diogo Almeida; source: [TypeSafe AI's article](https://typesafe.ai/blog/introducing-system-one-models-and-jev) |
-
-These files are not original OpenJev documentation and are excluded from the root license grant. No third-party redistribution license is established by their inclusion here. Refer to the original publisher for applicable terms. New contributions should prefer attributed links and concise original summaries over copying third-party articles.
+Those archived texts remain the work of their respective rights holders; OpenJev's license does not relicense them. New contributions should use attributed links and concise original summaries.
 
 Jev and TypeSafe AI names are used for identification and discussion. OpenJev is not affiliated with or endorsed by TypeSafe AI.
 
-## Qwen model backbone
+## Upstream models
 
-The planned base checkpoint is [Qwen/Qwen3-1.7B-Base](https://huggingface.co/Qwen/Qwen3-1.7B-Base). No upstream model weights are currently bundled in this repository.
+The student backbone is configurable. Historical engineering checks used Qwen3-1.7B-Base; the local teacher canary used Huihui-Qwen3.8-27B-abliterated-NVFP4-v4. These are separate roles, and no upstream model weights are bundled in this repository.
 
 When publishing derived weights or adapters, record the exact upstream revision and include the license and notices required by that revision. The project's software license alone does not document all terms for a future model artifact.
 

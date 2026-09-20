@@ -41,3 +41,5 @@ Thumbs.db
 *.log
 
 # Keep small, reviewed examples outside the generated-data directories.
+
+/trash/

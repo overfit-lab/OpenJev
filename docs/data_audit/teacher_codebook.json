@@ -1,0 +1,24 @@
+{
+  "schema_version": "openjev-teacher-codebook-v1",
+  "tokenizer_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+  "answer_prefix": "Answer:\n",
+  "tested_prefixes": [
+    "Answer:\n",
+    "</think>\n\nAnswer:\n",
+    "<|im_start|>assistant\n<think>检查候选。\n</think>\n\nAnswer:\n"
+  ],
+  "tested_two_letter_count": 676,
+  "valid_two_letter_count": 562,
+  "selected_count": 255,
+  "seed": 20260920,
+  "numeric_000_to_254_token_lengths": [
+    3
+  ],
+  "actual_question_prefix_check_required": true,
+  "model_inference_tested": false,
+  "training_approved": false,
+  "teacher_variant": "Huihui-Qwen3.8-27B-abliterated-NVFP4-v4",
+  "artifact": "outputs/teacher_codebook_local_v1",
+  "codebook_sha256": "b9f196c07e2dd708fa323079b432b2ddc17dccf38da937c498c3d2b43a760756",
+  "manifest_sha256": "9636cc9740221aa0f022ea6d2c1e8aea9a98dfefe5966f3ede73c3536e1c18af"
+}

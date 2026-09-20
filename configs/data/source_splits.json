@@ -1,0 +1,17 @@
+{
+  "version": "source-splits-config-v1",
+  "seed": 20260920,
+  "fractions": {
+    "train": 0.72,
+    "dev_model": 0.08,
+    "calibration": 0.08,
+    "dev_policy": 0.06,
+    "test": 0.06
+  },
+  "holdout_family": "samsum",
+  "holdout_split": "test",
+  "lexical_jaccard": 0.85,
+  "min_view_characters": 80,
+  "review_scope": "All selected-group member conversations, all their user turns, recognizable documents, and prior exploration anchors; exact and exhaustive lexical threshold join within that scope. No claim of complete semantic or cross-language deduplication.",
+  "exclusion_anchors_file": "configs/data/source_exclusions.json"
+}

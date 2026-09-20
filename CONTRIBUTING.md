@@ -6,7 +6,7 @@ Current work covers the reference model, training data, and evaluation. See the 
 
 ## Where to start
 
-- Review the [overall design](docs/openjev_qwen3_design.md), [architecture](docs/openjev_model_architecture.md), and [training pipeline](docs/openjev_training_pipeline.md).
+- Review the [overall design](docs/openjev_design.md), [architecture](docs/openjev_model_architecture.md), and [training pipeline](docs/openjev_training_pipeline.md).
 - Open an issue for a bug, a focused feature proposal, or a research question.
 - Small documentation fixes can go directly into a pull request. Discuss changes to model semantics, data splits, loss functions, or release scope before substantial implementation.
 - Follow our [Code of Conduct](CODE_OF_CONDUCT.md). Sensitive reports belong in the process described in [SECURITY.md](SECURITY.md).
@@ -17,11 +17,12 @@ Fork the repository, create a branch for your change, and run:
 
 ```bash
 python3 scripts/check_docs.py
+python3 -m unittest scripts.test_chat_records scripts.test_prepare_chat_pool scripts.test_contract scripts.test_teacher_codes scripts.test_questions scripts.test_teacher_collection
 ```
 
 The check requires Python 3.10+ and validates local documentation links, code fences, JSON examples, and SVG assets. It uses only the standard library.
 
-Model and training setup instructions will accompany the implementation.
+The [conversation data plan](docs/openjev_training_pipeline.md) covers corpus preparation and teacher labeling. Historical synthetic experiments are listed in the [archive record](docs/ARCHIVE.md). The [execution guide](docs/execution.md) includes the scoring-model environment, data synthesis commands, and numerical tests.
 
 ## Documentation and examples
 
@@ -31,9 +32,11 @@ Label examples and proposals clearly. Benchmark results should include the model
 
 Use relative links inside the repository. Keep diagrams as editable text or SVG where practical. Provide alternative text for images, and avoid requiring external fonts or scripts to understand a diagram.
 
+Keep machine-specific absolute paths out of source files, documentation, configuration, and shareable reports. Supply local dataset directories through runtime arguments such as --root and record provenance relative to that directory.
+
 ## Code contributions
 
-When implementation starts, keep the input compiler, reference scorer, optimized scorer, loss computation, calibration, and workflow evaluation responsibilities separate. Add checks appropriate to the change and describe how you validated it.
+Keep the input compiler, reference scorer, optimized scorer, loss computation, calibration, and workflow evaluation responsibilities separate. Add checks appropriate to the change and describe how you validated it.
 
 For changes to shared computation, include reference comparisons for logits, loss, and gradients. For performance claims, report hardware, dtype, input sizes, candidate counts, batch/concurrency, warmup, and the baseline configuration. A lower theoretical operation count alone is not a measured speedup.
 

@@ -1,0 +1,200 @@
+{
+  "date": "2026-09-20",
+  "question_run": "outputs/questions_api_current",
+  "question_manifest_sha256": "aa10bb0693624308c61f1ad5cf441fbe92200fc72faf117f5fd680df55866872",
+  "teacher_run": "outputs/teacher_local_canary",
+  "teacher_manifest_sha256": "da8c90f8ead0aad46c906039d2762b7fa54384c60029c45c2f1dd0c6229b7d79",
+  "question_summary": {
+    "planned_questions": 100,
+    "attempted_sources": 24,
+    "accepted_questions": 2,
+    "remaining_slots": 98,
+    "rejections": {
+      "semantic_review": 8,
+      "candidate_count_mismatch": 2,
+      "insufficient_material": 4,
+      "invalid_json": 7,
+      "duplicate_or_empty_candidate": 1
+    },
+    "accepted_by_bucket": {
+      "2-8": 1,
+      "noul": 1
+    },
+    "actual_choice_k": {
+      "7": 1
+    },
+    "requested_question_languages": {
+      "zh": 1,
+      "ja": 1
+    },
+    "planned_by_bucket": {
+      "2-8": 36,
+      "9-32": 20,
+      "33-64": 12,
+      "65-128": 8,
+      "129-255": 4,
+      "noul": 20
+    },
+    "source_families": {
+      "hc3": 1,
+      "dolly": 1
+    },
+    "actual_option_token_buckets": {
+      "1-8": 0,
+      "9-32": 6,
+      "33-96": 1,
+      "97-256": 0
+    },
+    "language_independently_verified": false,
+    "soft_labels": 0,
+    "training_approved": false
+  },
+  "teacher": {
+    "name": "Huihui-Qwen3.8-27B-abliterated-NVFP4-v4",
+    "config_sha256": "b2b862a64ad787d839829469d1ed653705041bb422b8505dfcf07a1d9afcdda0",
+    "tokenizer_sha256": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+    "template_sha256": "e5d078b00e6c1223b32444db8c1001dc71d86ceef8ee706b5bf084c3a43a1f9c",
+    "model_json_files": {
+      "config.json": "b2b862a64ad787d839829469d1ed653705041bb422b8505dfcf07a1d9afcdda0",
+      "gate9_cases.json": "92067f411f36a6985d717d1ae5d8b52dd09df59699eb2af3dd174b6e8d46c1c1",
+      "generation_config.json": "d0d0ed2e37cdfafef4a5067d5ea2407b05f4fb50526e47c008a5b235d50240fb",
+      "hf_quant_config.json": "42ffd69ec272d41b75a032de4f20007785b42851c293a7c38c08cf21b0971990",
+      "model.safetensors.index.json": "33ae7d14759443352b1f26cdc1ed62e22eeef823939ad3181a1b634265808b53",
+      "preprocessor_config.json": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516",
+      "tokenizer.json": "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523",
+      "tokenizer_config.json": "e5d078b00e6c1223b32444db8c1001dc71d86ceef8ee706b5bf084c3a43a1f9c",
+      "video_preprocessor_config.json": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13"
+    },
+    "weights": {
+      "model-00001-of-00005.safetensors": "37f02f2bd8419cacc5aa012ad102a08696b5468a475eb89f37f99b4ba6050283",
+      "model-00002-of-00005.safetensors": "86dfd7b679bc1d847d60e28b088db5451155519d268b45972a3b92c2f667602f",
+      "model-00003-of-00005.safetensors": "0bcd896323d51053063e8628b4b72c6eb8edac9e3a8b9f3796f66c51a6c2e62b",
+      "model-00004-of-00005.safetensors": "3b9a28f61acbdb92c76eaf131e1cfaba1d01ccf946ddeffd5855af5ebd079872",
+      "model-00005-of-00005.safetensors": "9ce944d534eabdd493076a3a52c7ebd31f41c135b340a1ea95c5a695e6f1f6b2"
+    },
+    "quantization_method": "modelopt",
+    "vllm_version": "0.24.0",
+    "score_mode": "raw_logits"
+  },
+  "backend": {
+    "linear": "marlin",
+    "dtype": "bfloat16",
+    "kv_cache_dtype": "bfloat16"
+  },
+  "collection": [
+    {
+      "question_record_id": "question_d3a211e0b1cdfbe7f1c3fd9e283deb71ec8f044e3cd2ac3e0ce67dcb9b38e628",
+      "type": "choice",
+      "candidate_count": 7,
+      "inspection": "reject_underspecified_action_selection",
+      "traces": 4,
+      "thinking_tokens": [
+        1068,
+        948,
+        633,
+        657
+      ],
+      "elapsed_seconds": 246.716,
+      "candidate_mass_range": [
+        0.8262542756782232,
+        0.9372901228222372
+      ],
+      "vocabulary_sizes": [
+        248320
+      ],
+      "variants": {
+        "M1_T1": {
+          "top_probability": 0.9999755092402131,
+          "entropy_nats": 0.0002984860311787117
+        },
+        "M1_T2": {
+          "top_probability": 0.9926425574343611,
+          "entropy_nats": 0.05111665418267248
+        },
+        "M1_T4": {
+          "top_probability": 0.856206636120871,
+          "entropy_nats": 0.6319528396152427
+        },
+        "M4_T1": {
+          "top_probability": 0.7498714583515379,
+          "entropy_nats": 0.5635750999000199
+        },
+        "M4_T2": {
+          "top_probability": 0.7387505584757703,
+          "entropy_nats": 0.6238726674916691
+        },
+        "M4_T4": {
+          "top_probability": 0.625189980195998,
+          "entropy_nats": 1.052446341798009
+        }
+      }
+    },
+    {
+      "question_record_id": "question_5916d3e159af1b29f98b18102543ba82b99479d317a25fdc97125f16ab4da2fa",
+      "type": "noul",
+      "candidate_count": 2,
+      "inspection": "teacher_experiment_only",
+      "traces": 4,
+      "thinking_tokens": [
+        134,
+        192,
+        158,
+        223
+      ],
+      "elapsed_seconds": 58.897,
+      "candidate_mass_range": [
+        0.7567899785928941,
+        0.8786425771854464
+      ],
+      "vocabulary_sizes": [
+        248320
+      ],
+      "variants": {
+        "M1_T1": {
+          "top_probability": 0.9999916019279664,
+          "entropy_nats": 0.00010655057420606689
+        },
+        "M1_T2": {
+          "top_probability": 0.9971104189822257,
+          "entropy_nats": 0.01977975298944515
+        },
+        "M1_T4": {
+          "top_probability": 0.9489172630429478,
+          "entropy_nats": 0.20169103952492212
+        },
+        "M4_T1": {
+          "top_probability": 0.9999962532266379,
+          "entropy_nats": 5.056125896555407e-05
+        },
+        "M4_T2": {
+          "top_probability": 0.9982410518132185,
+          "entropy_nats": 0.012914477751787818
+        },
+        "M4_T4": {
+          "top_probability": 0.9608045278428529,
+          "entropy_nats": 0.1653788323091496
+        }
+      }
+    }
+  ],
+  "training_approved": false,
+  "human_reviewed": false,
+  "accepted_large_k_questions": 0,
+  "protected_splits_used": false,
+  "validation": {
+    "unit_tests_passed": 43,
+    "question_replay_passed": true,
+    "soft_target_replay_passed": true,
+    "collector_validator_sha256": "22c436bc881080c0cf02e1738d067595ae3a9655f036654b3f6e46c7f0f58365",
+    "floating_point_replay_tolerance": {
+      "rtol": 1e-12,
+      "atol": 1e-12
+    }
+  },
+  "limitations": [
+    "Only two automatically accepted questions; one rejected during assisted semantic inspection.",
+    "No reviewed large-candidate catalogue, no end-to-end 255-candidate semantic validation.",
+    "No independent accuracy/calibration labels; temperature is not calibration.",
+    "Training-set freeze and student soft-target loader/trainer remain future work."
+  ]
+}

@@ -2,7 +2,7 @@
 
 ## Current support status
 
-OpenJev is at the design stage. There are no released model or software versions with a defined security support window yet. Release-specific support information will be added when artifacts are published.
+OpenJev is in active development. There are no released model or software versions with a defined security support window yet. Release-specific support information will be added when artifacts are published.
 
 ## Reporting a vulnerability
 

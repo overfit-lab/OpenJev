@@ -19,3 +19,5 @@ jobs:
           persist-credentials: false
       - name: Validate documentation and assets
         run: python3 scripts/check_docs.py
+      - name: Validate chat boundaries, public contracts and teacher codes
+        run: python3 -m unittest scripts.test_chat_records scripts.test_prepare_chat_pool scripts.test_contract scripts.test_teacher_codes scripts.test_questions scripts.test_teacher_collection
